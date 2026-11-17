@@ -1,0 +1,112 @@
+<section class="movie-list-view" aria-labelledby="movie-list-title">
+  <header class="movie-list-heading">
+    <div>
+      <h2 id="movie-list-title">Movie List</h2>
+      <p>Browse the Golden Raspberry Awards nominees and winners.</p>
+    </div>
+    <p class="result-count">Total: {{ totalElements() }} movies</p>
+  </header>
+
+  <section class="movie-table-card" aria-label="Movies and filters">
+    <div class="table-scroll">
+      <table [attr.aria-busy]="loading()">
+        <caption class="visually-hidden">Movies, years, and winner status</caption>
+        <colgroup>
+          <col class="id-column" />
+          <col class="year-column" />
+          <col class="title-column" />
+          <col class="winner-column" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">
+              <label for="year-filter">Year</label>
+              <input #yearInput id="year-filter" name="year" type="number" min="1900" max="2100"
+                [value]="yearFilter() ?? ''" (input)="onYearChanged(yearInput.value)" />
+            </th>
+            <th scope="col">Title</th>
+            <th scope="col">
+              <label for="winner-filter">Winner?</label>
+              <select #winnerSelect id="winner-filter" name="winner" [value]="
+                  winnerFilter() === null
+                    ? ''
+                    : winnerFilter()
+                      ? 'true'
+                      : 'false'
+                " (change)="onWinnerChanged(winnerSelect.value)">
+                <option value="">All</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+          @for (placeholder of loadingRows; track placeholder) {
+          <tr class="skeleton-row">
+            <td>
+              @if (placeholder === 0) {
+              <span class="visually-hidden" role="status">Loading movies...</span>
+              }
+              <span class="skeleton-block skeleton-id" aria-hidden="true"></span>
+            </td>
+            <td>
+              <span class="skeleton-block skeleton-year" aria-hidden="true"></span>
+            </td>
+            <td>
+              <span class="skeleton-block skeleton-title" aria-hidden="true"></span>
+            </td>
+            <td>
+              <span class="skeleton-block skeleton-winner" aria-hidden="true"></span>
+            </td>
+          </tr>
+          }
+          } @else if (error()) {
+          <tr>
+            <td class="table-status error-message" colspan="4" role="alert">
+              {{ error() }}
+            </td>
+          </tr>
+          } @else if (movies().length === 0) {
+          <tr>
+            <td class="table-status" colspan="4" role="status">
+              No movies found for the selected filters.
+            </td>
+          </tr>
+          } @else {
+          @for (movie of movies(); track movie.id) {
+          <tr>
+            <td>{{ movie.id }}</td>
+            <td>{{ movie.year }}</td>
+            <td>{{ movie.title }}</td>
+            <td>
+              <span class="winner-badge" [class.is-winner]="movie.winner" [class.is-not-winner]="!movie.winner">
+                {{ movie.winner ? 'Yes' : 'No' }}
+              </span>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="pagination">
+      <nav aria-label="Movie pages">
+        <button type="button" (click)="goToPreviousPage()" [disabled]="loading() || page() === 0">
+          Previous
+        </button>
+        @if (totalPages() > 0) {
+        <span>Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        } @else {
+        <span>No pages</span>
+        }
+        <button type="button" (click)="goToNextPage()" [disabled]="loading() || page() + 1 >= totalPages()">
+          Next
+        </button>
+      </nav>
+    </footer>
+  </section>
+</section>

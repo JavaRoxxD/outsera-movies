@@ -1,0 +1,16 @@
+<header class="app-header">
+  <h1>Frontend Angular Test</h1>
+</header>
+
+<aside class="app-sidebar">
+  <nav aria-label="Main navigation">
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      Dashboard
+    </a>
+    <a routerLink="/movies" routerLinkActive="active">List</a>
+  </nav>
+</aside>
+
+<main class="app-content">
+  <router-outlet />
+</main>
