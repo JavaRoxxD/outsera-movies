@@ -4,11 +4,22 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { MoviePageResponse, SortMetadata } from '../models/movie.model';
+import { Movie, MoviePageResponse, SortMetadata } from '../models/movie.model';
 import { MovieService } from './movie.service';
 
 const API_URL = 'https://challenge.outsera.tech/api/movies';
 const SORT: SortMetadata = { empty: true, sorted: false, unsorted: true };
+
+function createMovie(id: number): Movie {
+  return {
+    id,
+    year: 2018,
+    title: `Movie ${id}`,
+    studios: ['Studio'],
+    producers: ['Producer'],
+    winner: true,
+  };
+}
 
 function createPageResponse(page: number): MoviePageResponse {
   return {
@@ -101,5 +112,33 @@ describe('MovieService', () => {
           request.params.get('year') === '2018',
       )
       .flush({ value: [], Count: 0 });
+  });
+
+  it('normalizes arrays, envelopes, a single movie, and null to Movie arrays', () => {
+    const results: Movie[][] = [];
+    service.getWinnersByYear(2018).subscribe((movies) => results.push(movies));
+    service.getWinnersByYear(2019).subscribe((movies) => results.push(movies));
+    service.getWinnersByYear(2020).subscribe((movies) => results.push(movies));
+    service.getWinnersByYear(2021).subscribe((movies) => results.push(movies));
+
+    httpTestingController
+      .expectOne((request) => request.params.get('year') === '2018')
+      .flush([createMovie(1), createMovie(2)]);
+    httpTestingController
+      .expectOne((request) => request.params.get('year') === '2019')
+      .flush({ value: [createMovie(3)], Count: 1 });
+    httpTestingController
+      .expectOne((request) => request.params.get('year') === '2020')
+      .flush(createMovie(4));
+    httpTestingController
+      .expectOne((request) => request.params.get('year') === '2021')
+      .flush(null);
+
+    expect(results).toEqual([
+      [createMovie(1), createMovie(2)],
+      [createMovie(3)],
+      [createMovie(4)],
+      [],
+    ]);
   });
 });

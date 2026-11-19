@@ -1,39 +1,35 @@
-<section class="dashboard" aria-labelledby="dashboard-title">
-  <header class="dashboard-heading">
-    <h2 id="dashboard-title">Dashboard</h2>
-  </header>
-
+<section class="dashboard" aria-labelledby="years-title">
   <div class="dashboard-grid">
     <article class="dashboard-card">
-      <h3>Years with multiple winners</h3>
+      <h3 id="years-title">List years with multiple winners</h3>
 
       @if (yearsLoading()) {
-      <p class="status-message" role="status">Loading years...</p>
+        <p class="status-message" role="status">Loading years...</p>
       } @else if (yearsError()) {
-      <p class="status-message error-message" role="alert">{{ yearsError() }}</p>
+        <p class="status-message error-message" role="alert">{{ yearsError() }}</p>
       } @else {
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Year</th>
-              <th scope="col">Win Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (year of years(); track year.year) {
-            <tr>
-              <td>{{ year.year }}</td>
-              <td>{{ year.winnerCount }}</td>
-            </tr>
-            } @empty {
-            <tr>
-              <td colspan="2">No years found.</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Year</th>
+                <th scope="col">Win Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (year of years(); track year.year) {
+                <tr>
+                  <td>{{ year.year }}</td>
+                  <td>{{ year.winnerCount }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="2">No results found.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </article>
 
@@ -41,114 +37,134 @@
       <h3>Top 3 studios with winners</h3>
 
       @if (studiosLoading()) {
-      <p class="status-message" role="status">Loading studios...</p>
+        <p class="status-message" role="status">Loading studios...</p>
       } @else if (studiosError()) {
-      <p class="status-message error-message" role="alert">{{ studiosError() }}</p>
+        <p class="status-message error-message" role="alert">{{ studiosError() }}</p>
       } @else {
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Win Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (studio of topStudios(); track studio.name) {
-            <tr>
-              <td>{{ studio.name }}</td>
-              <td>{{ studio.winCount }}</td>
-            </tr>
-            } @empty {
-            <tr>
-              <td colspan="2">No studios found.</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Win Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (studio of topStudios(); track studio.name) {
+                <tr>
+                  <td>{{ studio.name }}</td>
+                  <td>{{ studio.winCount }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="2">No results found.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </article>
 
     <article class="dashboard-card">
-      <h3>Producers with longest and shortest intervals</h3>
+      <h3>Producers with longest and shortest interval between wins</h3>
 
       @if (intervalsLoading()) {
-      <p class="status-message" role="status">Loading producer intervals...</p>
+        <p class="status-message" role="status">Loading producer intervals...</p>
       } @else if (intervalsError()) {
-      <p class="status-message error-message" role="alert">{{ intervalsError() }}</p>
+        <p class="status-message error-message" role="alert">{{ intervalsError() }}</p>
       } @else {
-      <section class="interval-group" aria-labelledby="maximum-title">
-        <h4 id="maximum-title">Maximum</h4>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Producer</th>
-                <th scope="col">Interval</th>
-                <th scope="col">Previous Year</th>
-                <th scope="col">Following Year</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (interval of maximumIntervals(); track interval.producer + interval.followingWin) {
-              <tr>
-                <td>{{ interval.producer }}</td>
-                <td>{{ interval.interval }}</td>
-                <td>{{ interval.previousWin }}</td>
-                <td>{{ interval.followingWin }}</td>
-              </tr>
-              } @empty {
-              <tr>
-                <td colspan="4">No maximum intervals found.</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <section class="interval-group" aria-labelledby="maximum-title">
+          <h4 id="maximum-title">Maximum</h4>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Producer</th>
+                  <th scope="col">Interval</th>
+                  <th scope="col">Previous Year</th>
+                  <th scope="col">Following Year</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (interval of maximumIntervals(); track interval.producer + interval.followingWin) {
+                  <tr>
+                    <td>{{ interval.producer }}</td>
+                    <td>{{ interval.interval }}</td>
+                    <td>{{ interval.previousWin }}</td>
+                    <td>{{ interval.followingWin }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4">No results found.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <section class="interval-group" aria-labelledby="minimum-title">
-        <h4 id="minimum-title">Minimum</h4>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Producer</th>
-                <th scope="col">Interval</th>
-                <th scope="col">Previous Year</th>
-                <th scope="col">Following Year</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (interval of minimumIntervals(); track interval.producer + interval.followingWin) {
-              <tr>
-                <td>{{ interval.producer }}</td>
-                <td>{{ interval.interval }}</td>
-                <td>{{ interval.previousWin }}</td>
-                <td>{{ interval.followingWin }}</td>
-              </tr>
-              } @empty {
-              <tr>
-                <td colspan="4">No minimum intervals found.</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <section class="interval-group" aria-labelledby="minimum-title">
+          <h4 id="minimum-title">Minimum</h4>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Producer</th>
+                  <th scope="col">Interval</th>
+                  <th scope="col">Previous Year</th>
+                  <th scope="col">Following Year</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (interval of minimumIntervals(); track interval.producer + interval.followingWin) {
+                  <tr>
+                    <td>{{ interval.producer }}</td>
+                    <td>{{ interval.interval }}</td>
+                    <td>{{ interval.previousWin }}</td>
+                    <td>{{ interval.followingWin }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4">No results found.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
       }
     </article>
 
     <article class="dashboard-card">
-      <h3>Movie winners by year</h3>
+      <h3>List movie winners by year</h3>
 
-      <form class="year-search" (submit)="searchWinners($event, yearInput.value)">
-        <label for="winner-year">Search by year</label>
+      <form class="year-search" novalidate (submit)="$event.preventDefault()">
         <div class="search-controls">
-          <input #yearInput id="winner-year" name="year" type="number" min="1" step="1" required />
-          <button type="submit" aria-label="Search">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <input
+            #yearInput
+            id="winner-year"
+            name="year"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Search by year"
+            aria-label="Search by year"
+            [attr.aria-invalid]="winnersError() ? 'true' : null"
+            (keyup.enter)="searchWinners($event, yearInput.value)"
+          />
+          <button
+            type="button"
+            aria-label="Search"
+            (click)="searchWinners($event, yearInput.value)"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m16 16 5 5" />
             </svg>
@@ -156,19 +172,8 @@
         </div>
       </form>
 
-      @if (winnersLoading()) {
-      <p class="status-message" role="status">Searching winners...</p>
-      } @else if (winnersError()) {
-      <p class="status-message error-message" role="alert">{{ winnersError() }}</p>
-      } @else if (!winnerSearchSubmitted()) {
-      <p class="status-message">Search for a year to see its winning movies.</p>
-      } @else if (winners().length === 0) {
-      <p class="status-message" role="status">
-        No winners found for the year {{ searchedYear() }}.
-      </p>
-      } @else {
       <div class="table-scroll">
-        <table>
+        <table [attr.aria-busy]="winnersLoading()">
           <thead>
             <tr>
               <th scope="col">Id</th>
@@ -177,17 +182,32 @@
             </tr>
           </thead>
           <tbody>
-            @for (movie of winners(); track movie.id) {
-            <tr>
-              <td>{{ movie.id }}</td>
-              <td>{{ movie.year }}</td>
-              <td>{{ movie.title }}</td>
-            </tr>
+            @if (winnersLoading()) {
+              <tr>
+                <td colspan="3" role="status">Searching winners...</td>
+              </tr>
+            } @else if (winnersError()) {
+              <tr>
+                <td class="error-message" colspan="3" role="alert">{{ winnersError() }}</td>
+              </tr>
+            } @else if (winnerSearchSubmitted() && winnersByYear().length === 0) {
+              <tr>
+                <td colspan="3" role="status">
+                  No results found for the year {{ searchedYear() }}.
+                </td>
+              </tr>
+            } @else {
+              @for (movie of winnersByYear(); track movie.id) {
+                <tr>
+                  <td>{{ movie.id }}</td>
+                  <td>{{ movie.year }}</td>
+                  <td>{{ movie.title }}</td>
+                </tr>
+              }
             }
           </tbody>
         </table>
       </div>
-      }
     </article>
   </div>
 </section>

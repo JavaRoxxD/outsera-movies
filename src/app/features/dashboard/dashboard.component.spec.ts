@@ -79,12 +79,28 @@ describe('DashboardComponent', () => {
     ]);
   });
 
+  it('shows empty-result messages after successful responses with no data', () => {
+    const component = fixture.componentInstance;
+    component.years.set([]);
+    component.studios.set([]);
+    component.maximumIntervals.set([]);
+    component.minimumIntervals.set([]);
+    fixture.detectChanges();
+
+    const dashboard = fixture.nativeElement as HTMLElement;
+    expect(dashboard.querySelectorAll('tbody').length).toBe(5);
+    expect(dashboard.textContent?.match(/No results found\./g)).toHaveLength(4);
+    expect(dashboard.textContent).not.toContain('Loading');
+  });
+
   it('searches winners by year and renders the result columns', () => {
     const dashboard = fixture.nativeElement as HTMLElement;
     const input = dashboard.querySelector('#winner-year') as HTMLInputElement;
     input.value = '2018';
-    const form = dashboard.querySelector('form') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const searchButton = dashboard.querySelector(
+      'button[aria-label="Search"]',
+    ) as HTMLButtonElement;
+    searchButton.click();
     fixture.detectChanges();
 
     httpTestingController
@@ -118,12 +134,15 @@ describe('DashboardComponent', () => {
 
   it('shows an empty state before searching and when no winners are found', () => {
     const dashboard = fixture.nativeElement as HTMLElement;
-    expect(dashboard.textContent).toContain('Search for a year to see its winning movies.');
+    const resultsTable = dashboard.querySelector('.dashboard-card:last-child table');
+    expect(resultsTable?.querySelectorAll('th')).toHaveLength(3);
+    expect(resultsTable?.querySelector('tbody')?.textContent?.trim()).toBe('');
 
     const input = dashboard.querySelector('#winner-year') as HTMLInputElement;
     input.value = '1900';
-    const form = dashboard.querySelector('form') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    input.dispatchEvent(
+      new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }),
+    );
     fixture.detectChanges();
 
     httpTestingController
@@ -135,6 +154,20 @@ describe('DashboardComponent', () => {
       .flush({ value: [], Count: 0 });
     fixture.detectChanges();
 
-    expect(dashboard.textContent).toContain('No winners found for the year 1900.');
+    expect(dashboard.textContent).toContain('No results found for the year 1900.');
+  });
+
+  it('shows validation feedback and does not request winners for an empty year', () => {
+    const dashboard = fixture.nativeElement as HTMLElement;
+    const input = dashboard.querySelector('#winner-year') as HTMLInputElement;
+    input.dispatchEvent(
+      new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }),
+    );
+    fixture.detectChanges();
+
+    expect(dashboard.textContent).toContain('Enter a valid year.');
+    httpTestingController.expectNone(
+      (request) => request.url === `${API_URL}/winnersByYear`,
+    );
   });
 });

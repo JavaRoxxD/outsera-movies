@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   EMPTY,
@@ -42,8 +42,30 @@ export class MovieListComponent implements OnInit {
   readonly loadingRows = Array.from({ length: 15 }, (_, index) => index);
   readonly page = signal(0);
   readonly pageSize = 15;
+  readonly fillerRows = computed(() => {
+    const hasStatusRow = Boolean(this.error()) || this.movies().length === 0;
+    const renderedRows = this.loading()
+      ? this.pageSize
+      : hasStatusRow
+        ? 1
+        : this.movies().length;
+
+    return Array.from(
+      { length: Math.max(0, this.pageSize - renderedRows) },
+      (_, index) => index,
+    );
+  });
   readonly totalElements = signal(0);
   readonly totalPages = signal(0);
+  readonly visiblePages = computed(() => {
+    const total = this.totalPages();
+    const firstPage = Math.max(0, Math.min(this.page() - 2, total - 5));
+
+    return Array.from(
+      { length: Math.min(total, 5) },
+      (_, index) => firstPage + index,
+    );
+  });
   readonly yearFilter = signal<number | null>(null);
   readonly winnerFilter = signal<boolean | null>(null);
   readonly loading = signal(true);
@@ -135,6 +157,18 @@ export class MovieListComponent implements OnInit {
   goToNextPage(): void {
     if (this.page() + 1 < this.totalPages() && !this.loading()) {
       this.pageChanges.next(this.page() + 1);
+    }
+  }
+
+  goToPage(page: number): void {
+    if (
+      Number.isInteger(page) &&
+      page >= 0 &&
+      page < this.totalPages() &&
+      page !== this.page() &&
+      !this.loading()
+    ) {
+      this.pageChanges.next(page);
     }
   }
 

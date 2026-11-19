@@ -92,6 +92,7 @@ describe('MovieListComponent', () => {
     expect(headings).toEqual(['ID', 'Year', 'Title', 'Winner?']);
     expect(table.textContent).toContain('Movie 1');
     expect(table.textContent).toContain('Yes');
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(PAGE_SIZE);
     expect(component.totalElements()).toBe(35);
     expect(component.totalPages()).toBe(3);
   });
@@ -108,6 +109,7 @@ describe('MovieListComponent', () => {
     expect(root.querySelector('table')).toBe(table);
     expect(table?.querySelector('thead')).toBe(tableHeader);
     expect(root.querySelector('.pagination')).toBe(pagination);
+    expect(table?.querySelectorAll('tbody tr')).toHaveLength(PAGE_SIZE);
     expect(root.querySelectorAll('tbody .skeleton-row')).toHaveLength(15);
 
     httpTestingController
@@ -166,5 +168,6 @@ describe('MovieListComponent', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'No movies found for the selected filters.',
     );
+    expect(root.querySelectorAll('tbody tr')).toHaveLength(PAGE_SIZE);
   });
 });

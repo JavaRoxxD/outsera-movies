@@ -1,6 +1,14 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subject, catchError, finalize, switchMap, tap } from 'rxjs';
+import {
+  EMPTY,
+  Subject,
+  catchError,
+  finalize,
+  switchMap,
+  tap,
+  timeout,
+} from 'rxjs';
 import {
   Movie,
   ProducerWinInterval,
@@ -18,7 +26,8 @@ import { MovieService } from '../../core/services/movie.service';
 export class DashboardComponent implements OnInit {
   private readonly movieService = inject(MovieService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly winnerSearches = new Subject<number>();
+  private readonly winnerSearches = new Subject<number | null>();
+  private readonly requestTimeoutMs = 15_000;
 
   readonly years = signal<YearWithMultipleWinners[]>([]);
   readonly yearsLoading = signal(true);
@@ -39,7 +48,7 @@ export class DashboardComponent implements OnInit {
   readonly intervalsLoading = signal(true);
   readonly intervalsError = signal<string | null>(null);
 
-  readonly winners = signal<Movie[]>([]);
+  readonly winnersByYear = signal<Movie[]>([]);
   readonly winnersLoading = signal(false);
   readonly winnersError = signal<string | null>(null);
   readonly winnerSearchSubmitted = signal(false);
@@ -59,6 +68,8 @@ export class DashboardComponent implements OnInit {
     if (!yearInput.trim() || !Number.isInteger(year) || year <= 0) {
       this.winnerSearchSubmitted.set(true);
       this.winnersError.set('Enter a valid year.');
+      this.winnersLoading.set(false);
+      this.winnerSearches.next(null);
       return;
     }
 
@@ -71,15 +82,17 @@ export class DashboardComponent implements OnInit {
   private loadYears(): void {
     this.movieService
       .getYearsWithMultipleWinners()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        timeout({ first: this.requestTimeoutMs }),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.yearsLoading.set(false)),
+      )
       .subscribe({
         next: (response) => {
           this.years.set(response.years);
-          this.yearsLoading.set(false);
         },
         error: () => {
           this.yearsError.set('Unable to load years with multiple winners.');
-          this.yearsLoading.set(false);
         },
       });
   }
@@ -87,15 +100,17 @@ export class DashboardComponent implements OnInit {
   private loadStudios(): void {
     this.movieService
       .getStudiosWithWinCount()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        timeout({ first: this.requestTimeoutMs }),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.studiosLoading.set(false)),
+      )
       .subscribe({
         next: (response) => {
           this.studios.set(response.studios);
-          this.studiosLoading.set(false);
         },
         error: () => {
           this.studiosError.set('Unable to load studios with winners.');
-          this.studiosLoading.set(false);
         },
       });
   }
@@ -103,16 +118,18 @@ export class DashboardComponent implements OnInit {
   private loadProducerIntervals(): void {
     this.movieService
       .getProducerWinIntervals()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        timeout({ first: this.requestTimeoutMs }),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.intervalsLoading.set(false)),
+      )
       .subscribe({
         next: (response) => {
           this.maximumIntervals.set(response.max);
           this.minimumIntervals.set(response.min);
-          this.intervalsLoading.set(false);
         },
         error: () => {
           this.intervalsError.set('Unable to load producer win intervals.');
-          this.intervalsLoading.set(false);
         },
       });
   }
@@ -121,12 +138,18 @@ export class DashboardComponent implements OnInit {
     this.winnerSearches
       .pipe(
         switchMap((year) => {
+          if (year === null) {
+            this.winnersLoading.set(false);
+            return EMPTY;
+          }
+
           this.winnersLoading.set(true);
           this.winnersError.set(null);
-          this.winners.set([]);
+          this.winnersByYear.set([]);
 
           return this.movieService.getWinnersByYear(year).pipe(
-            tap((response) => this.winners.set(response.value)),
+            timeout({ first: this.requestTimeoutMs }),
+            tap((movies) => this.winnersByYear.set(movies)),
             catchError(() => {
               this.winnersError.set('Unable to load winners for this year.');
               return EMPTY;

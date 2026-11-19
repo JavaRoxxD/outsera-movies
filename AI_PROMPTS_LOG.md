@@ -37,3 +37,24 @@
 - **Decisões técnicas:** Aplicar `table-layout: fixed`, largura total e larguras percentuais via `colgroup`; truncar conteúdo de células com ellipsis; manter tabela, cabeçalho/filtros e paginação fora das condições de loading; limitar o estado carregando a 15 linhas skeleton de altura fixa no `tbody`; preservar os dados e metadados anteriores enquanto uma nova requisição está em andamento; manter `@for` rastreado por `movie.id`; testar a identidade estável do `table`, `thead` e paginação durante a requisição.
 - **Arquivos criados/alterados:** `src/app/features/movies/movie-list.component.ts`, `src/app/features/movies/movie-list.component.html`, `src/app/features/movies/movie-list.component.scss`, `src/app/features/movies/movie-list.component.spec.ts`, `AI_PROMPTS_LOG.md`.
 - **Validação:** `npm run build` concluído com sucesso; `npm test -- --watch=false` aprovado com 11 testes em 5 arquivos.
+
+## Revisão visual e estabilidade de tabela
+
+- **Resumo do prompt:** Alinhar Dashboard e Movie List às referências visuais e corrigir o flicker/encolhimento da tabela; exibir estados de erro ou ausência de resultados sem loading infinito.
+- **Decisões técnicas:** Aplicar fonte Arial, paleta grafite/cinza/azul, header fixo, sidebar clara, cards em duas colunas e tabela de listagem com colunas de largura igual; manter `<table>`, cabeçalho, filtros e paginação montados durante requisições; fixar células de listagem em `1.375rem`, preencher cada página com linhas placeholder até o `pageSize` e manter `@for` rastreado por `movie.id`; exibir mensagens de ausência de dados no Dashboard e usar timeout de 15 segundos com `finalize` para encerrar estados de loading.
+- **Arquivos criados/alterados:** `src/styles.scss`, `src/app/app.scss`, `src/app/features/dashboard/dashboard.component.ts`, `src/app/features/dashboard/dashboard.component.html`, `src/app/features/dashboard/dashboard.component.scss`, `src/app/features/dashboard/dashboard.component.spec.ts`, `src/app/features/movies/movie-list.component.ts`, `src/app/features/movies/movie-list.component.html`, `src/app/features/movies/movie-list.component.scss`, `src/app/features/movies/movie-list.component.spec.ts`, `AI_PROMPTS_LOG.md`.
+- **Validação:** `npm run build` concluído com sucesso; `npm test -- --watch=false` aprovado com 12 testes em 5 arquivos.
+
+## Estabilização da Movie List
+
+- **Resumo do prompt:** Eliminar o desaparecimento e o redimensionamento da tabela durante filtros/paginação, mantendo os elementos visuais fixos e a altura estável mesmo com páginas incompletas.
+- **Decisões técnicas:** Não condicionar a existência da tabela, do `thead` ou da paginação ao loading; mostrar placeholders apenas no `tbody`; fixar `th`/`td` em `1.375rem` com `line-height` e padding compatíveis; usar `table-layout: fixed`, quatro colunas de 25% e ellipsis; preencher o corpo até 15 linhas com registros vazios não interativos; manter os dados reais rastreados por `movie.id`.
+- **Arquivos criados/alterados:** `src/app/features/movies/movie-list.component.ts`, `src/app/features/movies/movie-list.component.html`, `src/app/features/movies/movie-list.component.scss`, `src/app/features/movies/movie-list.component.spec.ts`, `AI_PROMPTS_LOG.md`.
+- **Validação:** build concluído com sucesso; 12 testes aprovados em 5 arquivos; verificação visual em 947×478 confirmou células de 22px, 15 linhas e cabeçalho/paginação visíveis.
+
+## Correção da busca de vencedores por ano
+
+- **Resumo do prompt:** Corrigir o contrato e o fluxo de busca anual do Dashboard para renderizar resultados do endpoint, suportar formatos de resposta diferentes, validar ano e apresentar estados de erro/resultado vazio.
+- **Decisões técnicas:** Normalizar com validação tipada respostas em array, envelope `{ value, Count }`, filme único ou `null` para `Movie[]`; tipar `getWinnersByYear` como `Observable<Movie[]>`; usar estado `winnersByYear` em Signal e renderizar com `@for (...; track movie.id)`; usar botão explícito e `keyup.enter`, com validação de input e cancelamento de busca pendente para entrada inválida; manter timeout, tratamento visível de erro e mensagem para lista vazia.
+- **Arquivos criados/alterados:** `src/app/core/models/movie.model.ts`, `src/app/core/services/movie.service.ts`, `src/app/core/services/movie.service.spec.ts`, `src/app/features/dashboard/dashboard.component.ts`, `src/app/features/dashboard/dashboard.component.html`, `src/app/features/dashboard/dashboard.component.spec.ts`, `AI_PROMPTS_LOG.md`.
+- **Validação:** `npm run build` concluído com sucesso; `npm test -- --watch=false` aprovado com 14 testes em 5 arquivos. A resposta atual do endpoint foi verificada e continha `{ value, Count }`.

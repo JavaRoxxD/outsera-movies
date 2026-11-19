@@ -66,10 +66,16 @@ export interface ProducerWinIntervalsResponse {
   max: ProducerWinInterval[];
 }
 
-export interface WinnersByYearResponse {
+export interface WinnersByYearEnvelope {
   value: Movie[];
   Count: number;
 }
+
+export type WinnersByYearResponse =
+  | Movie[]
+  | Movie
+  | WinnersByYearEnvelope
+  | null;
 
 export interface MovieQueryParams {
   page?: number;
